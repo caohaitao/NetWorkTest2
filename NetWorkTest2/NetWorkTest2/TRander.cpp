@@ -49,7 +49,7 @@ void TRander::GetRandNumbers(float * outs, int fsize)
         srand(time(0));
         for (int i = 0; i < fsize;i++) {
                 //outs[i] = GetAFBetwen0To1();
-			outs[i] = _uniform(-1.0,1.0);
+			outs[i] = _uniform(0,1.0);
         }
 }
 

@@ -56,22 +56,22 @@ bool OneTime2()
 				{0.2,0.6,0.3}
 				}*/;
 
-	//float www[9];
+	float www[9];
 	//NetWorkMath::randn(www, 9);
 	//TRander::GetControl()->GetAverageRandNumbers(www, 9);
-	//TRander::GetControl()->GetRandNumbers(www, 9);
+	TRander::GetControl()->GetRandNumbers(www, 9);
 
-	ws[0][0] = TRander::GetControl()->_uniform(-0.4,0.4);
-	ws[0][1] = 2 * ws[0][0];
-	ws[0][2] = -2 * ws[0][0];
+	//ws[0][0] = TRander::GetControl()->_uniform(-0.4,0.4);
+	//ws[0][1] = 2 * ws[0][0];
+	//ws[0][2] = -2 * ws[0][0];
 
-	ws[1][0] = TRander::GetControl()->_uniform(-0.4, 0.4);
-	ws[1][1] = 2 * ws[1][0];
-	ws[1][2] = -2 * ws[1][0];
+	//ws[1][0] = TRander::GetControl()->_uniform(-0.4, 0.4);
+	//ws[1][1] = 2 * ws[1][0];
+	//ws[1][2] = -2 * ws[1][0];
 
-	ws[2][0] = TRander::GetControl()->_uniform(-0.4, 0.4);
-	ws[2][1] = 2 * ws[2][0];
-	ws[2][2] = -2 * ws[2][0];
+	//ws[2][0] = TRander::GetControl()->_uniform(-0.4, 0.4);
+	//ws[2][1] = 2 * ws[2][0];
+	//ws[2][2] = -2 * ws[2][0];
 
 	//for (int i = 0; i < 3; i++)
 	//{
@@ -81,13 +81,13 @@ bool OneTime2()
 	//        }
 	//}
 
-	//for (int i = 0; i < 3; i++)
-	//{
-	//	for (int j = 0; j < 3; j++)
-	//	{
-	//		ws[i][j] = www[3 * i + j] * 2 - 1;
-	//	}
-	//}
+        for (int i = 0; i < 3; i++)
+        {
+                for (int j = 0; j < 3; j++)
+                {
+                        ws[i][j] = www[3 * i + j] * 2 - 1;
+                }
+        }
 
 
 	//ws[0][0] = -0.469385898516544;
@@ -112,6 +112,7 @@ bool OneTime2()
 	float das[3];
 
 	nparam pandao[3];
+        float delts[3];
 
 	for (int k = 0; k < 400000; k++)
 	{
@@ -123,34 +124,31 @@ bool OneTime2()
 			input as_layer2 = { as[0],as[1],1.0 };
 			as[2] = sigmod(Multy(as_layer2, ws[2]));
 
-			pandao[2][0] = (as[2] - results[i])*as[2] * (1 - as[2])*as[0];
-			pandao[2][1] = (as[2] - results[i])*as[2] * (1 - as[2])*as[1];
-			pandao[2][2] = (as[2] - results[i])*as[2] * (1 - as[2])*1.0;
-			ws[2][0] -= pandao[2][0] * SPEED;
-			ws[2][1] -= pandao[2][1] * SPEED;
-			ws[2][2] -= pandao[2][2] * SPEED;
+                        delts[2] = (as[2] - results[i])*as[2] * (1 - as[2]);
 
-			pandao[0][0] = (as[2] - results[i])*as[2] * (1 - as[2])*ws[2][0] * as[0] * (1 - as[0])*x[0];
-			pandao[0][1] = (as[2] - results[i])*as[2] * (1 - as[2])*ws[2][0] * as[0] * (1 - as[0])*x[1];
-			pandao[0][2] = (as[2] - results[i])*as[2] * (1 - as[2])*ws[2][0] * as[0] * (1 - as[0])*x[2];
-			ws[0][0] -= pandao[0][0] * SPEED;
-			ws[0][1] -= pandao[0][1] * SPEED;
-			ws[0][2] -= pandao[0][2] * SPEED;
+                        pandao[2][0] = delts[2] *as[0];
+                        pandao[2][1] = delts[2] *as[1];
+                        pandao[2][2] = delts[2] *1.0;
 
-			pandao[1][0] = (as[2] - results[i])*as[2] * (1 - as[2])*ws[2][1] * as[1] * (1 - as[1])*x[0];
-			pandao[1][1] = (as[2] - results[i])*as[2] * (1 - as[2])*ws[2][1] * as[1] * (1 - as[1])*x[1];
-			pandao[1][2] = (as[2] - results[i])*as[2] * (1 - as[2])*ws[2][1] * as[1] * (1 - as[1])*x[2];
-			ws[1][0] -= pandao[1][0] * SPEED;
-			ws[1][1] -= pandao[1][1] * SPEED;
-			ws[1][2] -= pandao[1][2] * SPEED;
+                        delts[0] = delts[2] * ws[2][0] * as[0] * (1 - as[0]);
 
-			//for (int j = 0; j < 3;j++)
-			//{
-			//	for (int jj = 0; jj < 3;jj++)
-			//	{
-			//		ws[j][jj] -= pandao[j][jj]*SPEED;
-			//	}
-			//}
+                        pandao[0][0] = delts[0] *x[0];
+                        pandao[0][1] = delts[0] *x[1];
+                        pandao[0][2] = delts[0] *x[2];
+
+                        delts[1] = delts[2] * ws[2][1] * as[1] * (1 - as[1]);
+
+                        pandao[1][0] = delts[1] *x[0];
+                        pandao[1][1] = delts[1] *x[1];
+                        pandao[1][2] = delts[1] *x[2];
+
+                        for (int j = 0; j < 3; j++)
+                        {
+                                for (int jj = 0; jj < 3; jj++)
+                                {
+                                        ws[j][jj] -= pandao[j][jj] * SPEED;
+                                }
+                        }
 		}
 	}
 
