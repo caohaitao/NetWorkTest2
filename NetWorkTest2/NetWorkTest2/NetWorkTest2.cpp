@@ -8,7 +8,7 @@
 
 #define E 2.718281828459
 
-#define SPEED 0.5
+#define SPEED 0.1
 #define SPEED_LINE 0.1
 
 typedef float f3[3];
@@ -40,6 +40,140 @@ void PrintParams(nparam ws[3])
                 }
                 printf("\n");
         }
+}
+bool OneTime2()
+{
+	input xs[4] = {
+		{ 0,0,1 },
+		{ 0,1,1 },
+		{ 1,0,1 },
+		{ 1,1,1 }
+	};
+	float results[4] = { 0,1,1,0 };
+	nparam ws[3]/* = {
+				{-0.59,-0.33,0.34},
+				{0.59,0.33,-0.34},
+				{0.2,0.6,0.3}
+				}*/;
+
+	//float www[9];
+	//NetWorkMath::randn(www, 9);
+	//TRander::GetControl()->GetAverageRandNumbers(www, 9);
+	//TRander::GetControl()->GetRandNumbers(www, 9);
+
+	ws[0][0] = TRander::GetControl()->_uniform(-0.4,0.4);
+	ws[0][1] = 2 * ws[0][0];
+	ws[0][2] = -2 * ws[0][0];
+
+	ws[1][0] = TRander::GetControl()->_uniform(-0.4, 0.4);
+	ws[1][1] = 2 * ws[1][0];
+	ws[1][2] = -2 * ws[1][0];
+
+	ws[2][0] = TRander::GetControl()->_uniform(-0.4, 0.4);
+	ws[2][1] = 2 * ws[2][0];
+	ws[2][2] = -2 * ws[2][0];
+
+	//for (int i = 0; i < 3; i++)
+	//{
+	//        for (int j = 0; j < 3; j++)
+	//        {
+	//                ws[i][j] = www[3 * i + j] / sqrt(1.5);
+	//        }
+	//}
+
+	//for (int i = 0; i < 3; i++)
+	//{
+	//	for (int j = 0; j < 3; j++)
+	//	{
+	//		ws[i][j] = www[3 * i + j] * 2 - 1;
+	//	}
+	//}
+
+
+	//ws[0][0] = -0.469385898516544;
+	//ws[0][1] = -0.73324671212824133;
+	//ws[0][2] = -0.54820561424668601;
+
+	//ws[1][0] = -0.3622861255619132;
+	//ws[1][1] = -0.97693066585266664;
+	//ws[1][2] = 0.86069880392249964;
+
+	//ws[2][0] = 0.47948393610449513;
+	//ws[2][1] = -0.39487032240400177;
+	//ws[2][2] = 0.00047689520685989528;
+
+	//NetWorkMath::randn(ws[2], 3);
+
+
+	//PrintParams(ws);
+
+
+	float as[3];
+	float das[3];
+
+	nparam pandao[3];
+
+	for (int k = 0; k < 400000; k++)
+	{
+		for (int i = 0; i < 4; i++)
+		{
+			input & x = xs[i];
+			as[0] = sigmod(Multy(ws[0], x));
+			as[1] = sigmod(Multy(ws[1], x));
+			input as_layer2 = { as[0],as[1],1.0 };
+			as[2] = sigmod(Multy(as_layer2, ws[2]));
+
+			pandao[2][0] = (as[2] - results[i])*as[2] * (1 - as[2])*as[0];
+			pandao[2][1] = (as[2] - results[i])*as[2] * (1 - as[2])*as[1];
+			pandao[2][2] = (as[2] - results[i])*as[2] * (1 - as[2])*1.0;
+			ws[2][0] -= pandao[2][0] * SPEED;
+			ws[2][1] -= pandao[2][1] * SPEED;
+			ws[2][2] -= pandao[2][2] * SPEED;
+
+			pandao[0][0] = (as[2] - results[i])*as[2] * (1 - as[2])*ws[2][0] * as[0] * (1 - as[0])*x[0];
+			pandao[0][1] = (as[2] - results[i])*as[2] * (1 - as[2])*ws[2][0] * as[0] * (1 - as[0])*x[1];
+			pandao[0][2] = (as[2] - results[i])*as[2] * (1 - as[2])*ws[2][0] * as[0] * (1 - as[0])*x[2];
+			ws[0][0] -= pandao[0][0] * SPEED;
+			ws[0][1] -= pandao[0][1] * SPEED;
+			ws[0][2] -= pandao[0][2] * SPEED;
+
+			pandao[1][0] = (as[2] - results[i])*as[2] * (1 - as[2])*ws[2][1] * as[1] * (1 - as[1])*x[0];
+			pandao[1][1] = (as[2] - results[i])*as[2] * (1 - as[2])*ws[2][1] * as[1] * (1 - as[1])*x[1];
+			pandao[1][2] = (as[2] - results[i])*as[2] * (1 - as[2])*ws[2][1] * as[1] * (1 - as[1])*x[2];
+			ws[1][0] -= pandao[1][0] * SPEED;
+			ws[1][1] -= pandao[1][1] * SPEED;
+			ws[1][2] -= pandao[1][2] * SPEED;
+
+			//for (int j = 0; j < 3;j++)
+			//{
+			//	for (int jj = 0; jj < 3;jj++)
+			//	{
+			//		ws[j][jj] -= pandao[j][jj]*SPEED;
+			//	}
+			//}
+		}
+	}
+
+	bool res = true;
+	float outs[4];
+	for (int i = 0; i < 4; i++)
+	{
+		input & x = xs[i];
+		as[0] = sigmod(Multy(ws[0], x));
+		as[1] = sigmod(Multy(ws[1], x));
+		input as_layer2 = { as[0],as[1],1.0 };
+		as[2] = sigmod(Multy(as_layer2, ws[2]));
+		outs[i] = as[2];
+		if (fabs(outs[i] - results[i])>0.2) {
+			res = false;
+		}
+	}
+	//printf("\n");
+	//PrintParams(ws);
+	printf("\n");
+	printf("%0.4f  %0.4f  %0.4f  %0.4f\n", outs[0], outs[1], outs[2], outs[3]);
+
+	return res;
 }
 bool OneTime()
 {
@@ -78,21 +212,18 @@ bool OneTime()
         }
 
 
-        //ws[0][0] = 0.7569752;
-        //ws[0][1] = 0.19939837;
-        //ws[0][2] = 0.32948969;
+        ws[0][0] = -0.469385898516544;
+        ws[0][1] = -0.73324671212824133;
+        ws[0][2] = -0.54820561424668601;
 
-        //ws[1][0] = -0.7099531;
-        //ws[1][1] = -0.49206245;
-        //ws[1][2] = -0.44755478;
+        ws[1][0] = -0.3622861255619132;
+        ws[1][1] = -0.97693066585266664;
+        ws[1][2] = 0.86069880392249964;
 
-        //ws[2][0] = 0.6046035;
-        //ws[2][1] = -0.37673705;
-        //ws[2][2] = 0.02429106;
+        ws[2][0] = 0.47948393610449513;
+        ws[2][1] = -0.39487032240400177;
+        ws[2][2] = 0.00047689520685989528;
 
-        //ws[0][2] = 0.01;
-        //ws[1][2] = 0.01;
-        //ws[2][2] = 0.01;
         //NetWorkMath::randn(ws[2], 3);
 
 
@@ -103,7 +234,7 @@ bool OneTime()
         float das[3];
 
 
-        for (int k = 0; k < 300000; k++)
+        for (int k = 0; k < 1000000; k++)
         {
                 for (int i = 0; i < 4; i++)
                 {
@@ -271,6 +402,8 @@ bool OneTimePython()
                         ws[i][j] = 2 * ws[i][j] - 1;
                 }
         }
+
+
         ws[0][0] = 0.82518572;
         ws[0][1] = -0.73232911;
         ws[0][2] = -0.20876042;
@@ -353,26 +486,26 @@ bool OneTimePython()
 }
 int main()
 {
-        float www[10000];
-        TRander::GetControl()->GetRandNumbers(www, 10000);
-        int a[10] = { 0 };
-        for (int i = 0; i < 10000; i++) {
-                int index = www[i] * 10;
-                a[index]++;
-        }
-        for (int i = 0; i < 10; i++) {
-                printf("i=%d:n=%d\n", i, a[i]);
-        }
-        return 1;
+        //float www[10000];
+        //TRander::GetControl()->GetRandNumbers(www, 10000);
+        //int a[10] = { 0 };
+        //for (int i = 0; i < 10000; i++) {
+        //        int index = www[i] * 10;
+        //        a[index]++;
+        //}
+        //for (int i = 0; i < 10; i++) {
+        //        printf("i=%d:n=%d\n", i, a[i]);
+        //}
+        //return 1;
         //float a[9];
         //TRander::GetControl()->GetRandNumbers(a,9);
 
         //return 0;
-        int whole_times = 40;
+        int whole_times = 100;
         int right_times = 0;
         for (int i = 0; i < whole_times;i++) {
                 printf("test time %d\n", i);
-                if (OneTime()){
+                if (OneTime2()){
                         right_times++;
                 }
                 

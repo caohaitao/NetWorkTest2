@@ -48,14 +48,15 @@ void TRander::GetRandNumbers(float * outs, int fsize)
 {
         srand(time(0));
         for (int i = 0; i < fsize;i++) {
-                outs[i] = GetAFBetwen0To1();
+                //outs[i] = GetAFBetwen0To1();
+			outs[i] = _uniform(-1.0,1.0);
         }
 }
 
 float TRander::GetAFBetwen0To1()
 {
-        int r = GetARandNumber(0, 100);
-        return (float)r / 100.0;
+        int r = GetARandNumber(0, 10000000);
+        return (float)r / 10000000;
 }
 
 float TRander::GetAFBetwenLowToHigh(float low, float high)
